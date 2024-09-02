@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask Chat App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='output.css') }}">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        .message {
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .message:hover {
+            background-color: #f0f0f0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        @media (max-width: 768px) {
+            .chat-container {
+                width: 100%;
+                height: 100vh;
+                margin: 0;
+                border-radius: 0;
+            }
+        }
+          .chat-container {
+            overflow-y: auto; /* Allow vertical scrolling */
+            overflow-x: hidden; /* Hide horizontal scrollbar */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 h-screen flex items-center justify-center">
+    <div class="bg-white shadow-lg w-full max-w-screen-xl max-w-[90vw] h-[90vh] flex flex-col chat-container">
+        <div class="p-4 sm:p-6 bg-black flex items-center justify-between">
+            <h1 class="text-2xl sm:text-3xl font-bold text-white">MG GPT</h1>
+            <!-- Dark Mode / Light Mode Toggle -->
+            <button id="theme-toggle" class="bg-gray-800 text-white p-2 rounded-full">
+                <svg id="theme-icon" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2a10 10 0 0 1 0 20M12 2a10 10 0 0 0 0 20M12 2v20"></path>
+                </svg>
+            </button>
+        </div>
+        <div class="flex-grow p-4 sm:p-6 overflow-y-auto" id="messages-container">
+            <div class="space-y-4">
+                {% for message in messages %}
+                    <div class="message p-4 rounded-lg shadow-md {{ 'bg-gray-200 text-left' if message.role == 'user' else 'bg-gray-300 text-left' }}">
+                        <p class="text-base sm:text-lg">{{ message.content }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        <form method="POST" class="flex p-4 sm:p-6 bg-gray-100 rounded-b-lg">
+            <input type="text" name="message" placeholder="Type your message..." required class="flex-grow p-3 sm:p-4 border border-gray-300 rounded-l-lg text-base sm:text-lg">
+            <button type="submit" class="bg-black text-white px-4 sm:px-6 py-2 sm:py-3 rounded-r-lg text-base sm:text-lg">Send</button>
+        </form>
+    </div>
+
+    <script>
+        const toggleButton = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+        const messagesContainer = document.getElementById('messages-container');
+
+        // Check for saved theme in localStorage
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        document.body.classList.toggle('dark', currentTheme === 'dark');
+        themeIcon.innerHTML = currentTheme === 'dark'
+            ? `<path d="M12 2a10 10 0 0 1 0 20M12 2a10 10 0 0 0 0 20M12 2v20"></path>`
+            : `<path d="M12 3v1m0 16v1M3 12h1m16 0h1m-1.071-5.071l.707.707m-13.142.707l.707-.707m.707-13.142l-.707.707m16.142.707l-.707-.707"></path>`;
+
+        toggleButton.addEventListener('click', () => {
+            const newTheme = document.body.classList.toggle('dark') ? 'dark' : 'light';
+            localStorage.setItem('theme', newTheme);
+            themeIcon.innerHTML = newTheme === 'dark'
+                ? `<path d="M12 2a10 10 0 0 1 0 20M12 2a10 10 0 0 0 0 20M12 2v20"></path>`
+                : `<path d="M12 3v1m0 16v1M3 12h1m16 0h1m-1.071-5.071l.707.707m-13.142.707l.707-.707m.707-13.142l-.707.707m16.142.707l-.707-.707"></path>`;
+        });
+
+        // Scroll to the bottom of the messages container when new messages are added
+        function scrollToBottom() {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Call the function to ensure it scrolls to bottom on page load
+        scrollToBottom();
+    </script>
+</body>
+</html>
